@@ -3,6 +3,8 @@ package de.paetow.rtreeclusterer
 import android.Manifest
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.lifecycleScope
 import org.osmdroid.config.Configuration
 import androidx.preference.PreferenceManager
@@ -10,7 +12,11 @@ import com.eazypermissions.common.model.PermissionResult
 import com.eazypermissions.coroutinespermission.PermissionManager
 import de.paetow.rtreeclusterer.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
+import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Marker
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +31,8 @@ class MainActivity : AppCompatActivity() {
         setContentView( binding.root)
 
         binding.map.setTileSource(TileSourceFactory.MAPNIK)
+        binding.map.controller.animateTo(GeoPoint(48.144667, 11.548861))
+        binding.map.controller.zoomTo(5.0)
 
         lifecycleScope.launch {
             val permissionResult = PermissionManager.requestPermissions(           //Suspends the coroutine
@@ -37,7 +45,7 @@ class MainActivity : AppCompatActivity() {
             //Resume coroutine once result is ready
             when(permissionResult) {
                 is PermissionResult.PermissionGranted -> {
-                    //Add your logic here after user grants permission(s)
+
                 }
                 is PermissionResult.PermissionDenied -> {
                     //Add your logic to handle permission denial
@@ -56,7 +64,34 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        binding.map.onResume(); //needed for compass, my location overlays, v6.0.0 and up
+        binding.map.onResume()
+
+        val markers = RadiusMarkerClusterer(this)
+        markers.setMaxClusteringZoomLevel(17)
+
+        val clusterIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_fiber_manual_record_24, null)?.toBitmap() ?: return
+        markers.setIcon(clusterIcon)
+
+        markers.mAnchorU = Marker.ANCHOR_CENTER
+        markers.mAnchorV =  Marker.ANCHOR_CENTER
+        markers.mTextAnchorU = Marker.ANCHOR_CENTER;
+        markers.mTextAnchorV = Marker.ANCHOR_CENTER
+        markers.textPaint.textSize = 11 * resources.displayMetrics.density
+
+        binding.map.overlays.add(markers)
+
+        val icon = ResourcesCompat.getDrawable(resources, R.drawable.marker_default_focused_base, null)
+
+        for (i in 0 .. 10000) {
+            markers.add(
+                    Marker(binding.map).apply {
+                        setIcon(icon)
+                        val random1 = Random.nextDouble(0.000000, 0.099999)
+                        val random2 = Random.nextDouble(0.000000, 0.099999)
+                        position = GeoPoint(48.14 + random1, 11.548861 + random2)
+                    }
+            )
+        }
     }
 
     override fun onPause() {
