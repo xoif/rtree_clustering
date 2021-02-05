@@ -66,7 +66,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         binding.map.onResume()
 
-        val markers = RadiusMarkerClusterer(this)
+        //val markers = RadiusMarkerClusterer(this)
+        val markers = RtreeClusterer(this, lifecycleScope)
         markers.setMaxClusteringZoomLevel(17)
 
         val clusterIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_fiber_manual_record_24, null)?.toBitmap() ?: return

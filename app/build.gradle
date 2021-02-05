@@ -17,6 +17,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            minifyEnabled false
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -53,4 +57,5 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.sagar:coroutinespermission:2.0.3'
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
+    implementation files('libs\\rtree2-0.9-RC2-SNAPSHOT.jar')
 }
